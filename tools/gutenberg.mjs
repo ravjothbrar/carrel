@@ -20,8 +20,9 @@ export function stripGutenberg(raw) {
 }
 
 const ROMAN = '[IVXL]+';
-// "ADVENTURE I. A SCANDAL IN BOHEMIA" as a heading line (the table of contents lists the titles without "ADVENTURE")
-const HEADING = new RegExp(`^ADVENTURE\\s+(${ROMAN})\\.\\s+(.+?)\\s*$`, 'gm');
+// "ADVENTURE I. A SCANDAL IN BOHEMIA" or "I. A SCANDAL IN BOHEMIA": an UPPERCASE title after a Roman numeral.
+// The table of contents lists the same titles in mixed case, so requiring uppercase skips it.
+const HEADING = new RegExp(`^(?:ADVENTURE\\s+)?(${ROMAN})\\.\\s+([A-Z][A-Z'’,;:!? -]{6,}?)\\s*$`, 'gm');
 
 /** @returns {{numeral: string, title: string, text: string}[]} */
 export function splitStories(body) {

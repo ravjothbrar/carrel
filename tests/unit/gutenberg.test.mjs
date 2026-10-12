@@ -61,3 +61,9 @@ test('toTitle', () => {
   assert.equal(toTitle('THE ADVENTURE OF THE SPECKLED BAND'), 'The Adventure of the Speckled Band');
   assert.equal(toTitle('THE RED-HEADED LEAGUE'), 'The Red-Headed League');
 });
+
+test('headings without the word ADVENTURE are found too, and mixed-case contents lines are not', () => {
+  const alt = FILE.replace(/ADVENTURE (I|II|VIII)\./g, '$1.');
+  const stories = splitStories(stripGutenberg(alt));
+  assert.deepEqual(stories.map((s) => s.title), ['A Scandal in Bohemia', 'The Red-Headed League', 'The Adventure of the Speckled Band']);
+});

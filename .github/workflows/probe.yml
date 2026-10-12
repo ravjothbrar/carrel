@@ -16,7 +16,7 @@ jobs:
       - run: node tools/hf-probe.mjs
       - name: Project Gutenberg text layout (headings of the stories carrel uses)
         run: |
-          curl -sSL --fail -A "carrel-probe" -o /tmp/pg1661.txt https://www.gutenberg.org/cache/epub/1661/pg1661.txt
+          curl -sSL --fail --retry 4 --retry-delay 4 --retry-all-errors -A "carrel-probe" -o /tmp/pg1661.txt https://www.gutenberg.org/cache/epub/1661/pg1661.txt
           wc -c /tmp/pg1661.txt
           grep -n -i -E "START OF|END OF" /tmp/pg1661.txt | head
           grep -n -E "^(ADVENTURE|[IVX]+\.)" /tmp/pg1661.txt | head -40

@@ -28,19 +28,30 @@ async function getText() {
   if (i > -1) return { raw: fs.readFileSync(process.argv[i + 1], 'utf8'), how: `local copy ${process.argv[i + 1]}` };
   let last = '';
   for (const url of [SOURCE_URL, 'https://www.gutenberg.org/files/1661/1661-0.txt', 'https://www.gutenberg.org/ebooks/1661.txt.utf-8']) {
-    try {
-      const res = await fetch(url, { headers: { 'User-Agent': 'carrel-sample-build (https://github.com/ravjothbrar/carrel)' } });
-      if (res.ok) return { raw: await res.text(), how: url };
-      last = `${url}: HTTP ${res.status}`;
-    } catch (e) {
-      last = `${url}: ${e.message}`;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(url, { headers: { 'User-Agent': 'carrel-sample-build (https://github.com/ravjothbrar/carrel)' } });
+        if (res.ok) return { raw: await res.text(), how: url };
+        last = `${url}: HTTP ${res.status}`;
+      } catch (e) {
+        last = `${url}: ${e.message}`;
+      }
+      await new Promise((r) => setTimeout(r, 3000 * attempt));
     }
   }
   throw new Error(`Could not fetch the text from Project Gutenberg (${last}). Download it yourself and pass --text file.txt`);
 }
 
 const { raw, how } = await getText();
-const stories = pickStories(splitStories(stripGutenberg(raw)), WANTED);
+const body = stripGutenberg(raw);
+let stories;
+try {
+  stories = pickStories(splitStories(body), WANTED);
+} catch (e) {
+  console.error(`${e.message}\nLines mentioning the stories (to fix the heading pattern):`);
+  body.split('\n').forEach((l, i) => /bohemia|speckled band|red-headed league/i.test(l) && console.error(`  ${i + 1}: ${JSON.stringify(l.slice(0, 100))}`));
+  throw e;
+}
 console.log(stories.map((s) => `  ${s.title}: ${s.text.split(/\s+/).length} words`).join('\n'));
 
 // 1. text: chunk with the app's own chunker, prefix as the model card says
