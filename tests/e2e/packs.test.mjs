@@ -1,7 +1,7 @@
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { ask, launch, openApp, pasteAll, waitForDesk, DOCS } from './harness.mjs';
+import { ask, launch, openApp, pasteAll, waitForDesk } from './harness.mjs';
 import { encodePack } from '../../js/pack.js';
 import { EMBED } from '../../js/config.js';
 

@@ -44,11 +44,9 @@ test('chunks stay within size bounds, overlap by about 15 percent and cover ever
     assert.ok(c.tokens >= CHUNK.minTokens - 40, `chunk far under min: ${c.tokens}`);
   }
   // overlap: the start of chunk k+1 appears at the end of chunk k
-  let overlapTokens = 0;
   for (let k = 0; k < chunks.length - 1; k++) {
     const nextFirst = chunks[k + 1].text.split('. ')[0];
     assert.ok(chunks[k].text.includes(nextFirst), `chunk ${k + 1} does not overlap chunk ${k}`);
-    overlapTokens += estimateTokens(nextFirst);
   }
   // every sentence index appears somewhere
   const joined = chunks.map((c) => c.text).join(' ');

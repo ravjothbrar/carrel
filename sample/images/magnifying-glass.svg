@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="800" height="560">
+  <!-- Original drawing made for carrel. Dedicated to the public domain under CC0 1.0. -->
+  <rect width="800" height="560" fill="#ece5d3"/>
+  <rect x="60" y="50" width="680" height="460" fill="#f6f1e3" stroke="#bcb5a3" stroke-width="3"/>
+  <!-- footprints -->
+  <g fill="#8a7a5a">
+    <g transform="translate(150 380) rotate(-14)"><ellipse cx="0" cy="0" rx="26" ry="52"/><circle cx="-18" cy="-66" r="8"/><circle cx="-4" cy="-72" r="8"/><circle cx="11" cy="-70" r="8"/><circle cx="24" cy="-62" r="8"/></g>
+    <g transform="translate(260 300) rotate(-10)"><ellipse cx="0" cy="0" rx="26" ry="52"/><circle cx="-18" cy="-66" r="8"/><circle cx="-4" cy="-72" r="8"/><circle cx="11" cy="-70" r="8"/><circle cx="24" cy="-62" r="8"/></g>
+    <g transform="translate(370 225) rotate(-6)"><ellipse cx="0" cy="0" rx="26" ry="52"/><circle cx="-18" cy="-66" r="8"/><circle cx="-4" cy="-72" r="8"/><circle cx="11" cy="-70" r="8"/><circle cx="24" cy="-62" r="8"/></g>
+  </g>
+  <!-- magnifying glass -->
+  <g>
+    <circle cx="540" cy="250" r="105" fill="#ffffff" fill-opacity="0.35" stroke="#2b2a26" stroke-width="16"/>
+    <circle cx="540" cy="250" r="88" fill="none" stroke="#2b2a26" stroke-opacity="0.25" stroke-width="3"/>
+    <path d="M500 214 q20 -22 52 -22" stroke="#ffffff" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.8"/>
+    <path d="M616 326 L700 430" stroke="#2b2a26" stroke-width="30" stroke-linecap="round"/>
+    <path d="M616 326 L650 368" stroke="#d8452b" stroke-width="30" stroke-linecap="round"/>
+    <!-- enlarged footprint inside the lens -->
+    <g transform="translate(540 262) rotate(-6) scale(0.9)" fill="#8a7a5a"><ellipse cx="0" cy="0" rx="26" ry="52"/><circle cx="-18" cy="-66" r="8"/><circle cx="-4" cy="-72" r="8"/><circle cx="11" cy="-70" r="8"/><circle cx="24" cy="-62" r="8"/></g>
+  </g>
+</svg>

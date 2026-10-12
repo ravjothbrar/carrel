@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="800" height="560">
+  <!-- Original drawing made for carrel. Dedicated to the public domain under CC0 1.0. -->
+  <rect width="800" height="560" fill="#2a2620"/>
+  <rect x="0" y="0" width="800" height="560" fill="#3a342b" opacity="0.5"/>
+  <!-- bell rope -->
+  <path d="M400 0 V470" stroke="#c9b48a" stroke-width="22"/>
+  <path d="M390 0 V470 M410 0 V470" stroke="#8c7a55" stroke-width="3"/>
+  <g stroke="#8c7a55" stroke-width="2">
+    <path d="M388 20 l24 10 M388 50 l24 10 M388 80 l24 10 M388 110 l24 10"/>
+  </g>
+  <path d="M400 470 l-26 70 h52 z" fill="#c9b48a" stroke="#8c7a55" stroke-width="3"/>
+  <!-- snake coiled down the rope -->
+  <path d="M400 70 C520 100 520 170 400 190 C280 210 280 280 400 300 C520 320 520 390 420 410 C380 418 360 440 380 470" fill="none" stroke="#c8a24a" stroke-width="34" stroke-linecap="round"/>
+  <path d="M400 70 C520 100 520 170 400 190 C280 210 280 280 400 300 C520 320 520 390 420 410 C380 418 360 440 380 470" fill="none" stroke="#6b4a1c" stroke-width="34" stroke-linecap="round" stroke-dasharray="3 22"/>
+  <g fill="#5a3b12">
+    <circle cx="470" cy="108" r="5"/><circle cx="498" cy="140" r="5"/><circle cx="455" cy="178" r="5"/><circle cx="330" cy="200" r="5"/><circle cx="300" cy="245" r="5"/><circle cx="335" cy="288" r="5"/><circle cx="470" cy="305" r="5"/><circle cx="500" cy="350" r="5"/><circle cx="460" cy="395" r="5"/>
+  </g>
+  <!-- head -->
+  <g transform="translate(400 52) rotate(-20)"><ellipse cx="0" cy="0" rx="34" ry="22" fill="#c8a24a"/><circle cx="-8" cy="-6" r="4" fill="#1b1a17"/><path d="M-30 4 l-18 8 l-6 -8" fill="none" stroke="#d8452b" stroke-width="3" stroke-linecap="round"/></g>
+</svg>

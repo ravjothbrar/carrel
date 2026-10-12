@@ -128,9 +128,12 @@ export function createSheet(question) {
 
 function sentenceEl(s, sheetId, validNumbers, unsupportedLabel) {
   const span = h('span', { class: `s ${s.status}`, dataset: { status: s.status } });
-  for (const part of splitCitations(s.raw)) {
+  const parts = splitCitations(s.raw);
+  for (const [i, part] of parts.entries()) {
     if (part.type === 'text') {
-      span.append(...inlineMarkdown(part.text.replace(/^\s*#{1,6}\s+/, '')));
+      // no gap between the words and the footnote mark that follows them
+      const text = parts[i + 1]?.type === 'cite' ? part.text.replace(/\s+$/, '') : part.text;
+      span.append(...inlineMarkdown(text.replace(/^\s*#{1,6}\s+/, '')));
     } else {
       const sup = h('sup', { class: 'fn' });
       part.nums.forEach((n, i) => {

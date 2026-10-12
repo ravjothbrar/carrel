@@ -20,9 +20,10 @@ export function spawn(relative) {
 }
 
 class Rpc {
-  constructor(path, { onNet, onDeviceLost }) {
+  constructor(path, { onNet, onNetFailed, onDeviceLost }) {
     this.path = path;
     this.onNet = onNet;
+    this.onNetFailed = onNetFailed;
     this.onDeviceLost = onDeviceLost;
     this.worker = null;
     this.next = 1;
@@ -35,6 +36,7 @@ class Rpc {
     this.worker.onmessage = (e) => {
       const m = e.data;
       if (m.type === 'net') return this.onNet?.(m.host);
+      if (m.type === 'net-failed') return this.onNetFailed?.(m.host);
       if (m.type === 'device-lost') return this.onDeviceLost?.(m.reason);
       if (m.type === 'ready') return;
       const p = this.pending.get(m.id);
@@ -42,7 +44,10 @@ class Rpc {
       if (m.type === 'progress') return p.onProgress?.(m.p);
       this.pending.delete(m.id);
       if (m.type === 'result') p.resolve(m.result);
-      else p.reject(Object.assign(new Error(m.message), { name: m.name }));
+      else {
+        if (m.stack) console.error(`[carrel worker ${this.path}] ${m.name}: ${m.message}\n${m.stack}`);
+        p.reject(Object.assign(new Error(m.message), { name: m.name }));
+      }
     };
     const crash = (message) => {
       for (const p of this.pending.values()) p.reject(Object.assign(new Error(message), { name: 'WorkerCrash' }));
@@ -91,7 +96,7 @@ export async function capabilities() {
  * @param {{net?: import('./netcount.js').NetCounter, onDeviceLost?: (reason: string, which: string) => void}} [opts]
  */
 export function createEngine({ net, onDeviceLost } = {}) {
-  const hooks = (which) => ({ onNet: (host) => net?.record(host), onDeviceLost: (r) => onDeviceLost?.(r, which) });
+  const hooks = (which) => ({ onNet: (host) => net?.record(host), onNetFailed: (host) => net?.recordFailed(host), onDeviceLost: (r) => onDeviceLost?.(r, which) });
   const embed = new Rpc('./workers/embed.worker.js', hooks('embed'));
   const gen = new Rpc('./workers/gen.worker.js', hooks('gen'));
 

@@ -103,6 +103,7 @@ function wireNetCounter() {
     $('#net-label').textContent = snap.count === 1 ? 'network request' : 'network requests';
     $('#verify-count').textContent = String(snap.count);
     $('#verify-blocked').textContent = String(snap.blocked);
+    $('#verify-failed').textContent = String(snap.failed);
     const hosts = Object.entries(snap.hosts).map(([host, n]) => `${host} ×${n}`);
     $('#verify-hosts').textContent = hosts.length ? `To: ${hosts.join(', ')}` : 'None so far.';
     $('#verify-local').textContent = `This site's own files fetched after load: ${snap.local}`;
@@ -284,6 +285,20 @@ function showVisionConsent({ bytes }) {
   });
 }
 
+/** Give focus back to whatever opened a dialog when it closes (browsers do this inconsistently). */
+function restoreFocusOnClose(dlg, fallbackSelector) {
+  let opener = null;
+  const remember = () => {
+    opener = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+  };
+  dlg.addEventListener('close', () => {
+    const target = opener?.isConnected && opener.offsetParent !== null ? opener : $(fallbackSelector);
+    if (document.activeElement !== target) target?.focus?.({ preventScroll: true });
+    opener = null;
+  });
+  return remember;
+}
+
 // ---------------------------------------------------------------------------------------------
 // controls
 // ---------------------------------------------------------------------------------------------
@@ -347,7 +362,9 @@ function wireControls(session) {
 
   // paste dialog
   const dlg = $('#paste-dialog');
+  const rememberPasteOpener = restoreFocusOnClose(dlg, '#app');
   function openPaste() {
+    rememberPasteOpener();
     $('#paste-text').value = '';
     $('#paste-name').value = '';
     dlg.showModal();
@@ -425,10 +442,12 @@ async function showFigure(session, sheet, result, question) {
 // ---------------------------------------------------------------------------------------------
 function wireSettings(session) {
   const dlg = $('#settings-dialog');
+  const rememberSettingsOpener = restoreFocusOnClose(dlg, '#open-settings');
   const toggle = $('#setting-large');
   const packInput = $('#file-pack');
 
   const openSettings = async () => {
+    rememberSettingsOpener();
     toggle.checked = readSetting();
     const info = session.upgradeInfo;
     $('#setting-large-note').textContent = info
@@ -436,14 +455,16 @@ function wireSettings(session) {
         ? `This device passed the checks (${info.tps?.toFixed(1)} tokens/s measured on ${GENERATORS.e2b.label}).`
         : `Not used on this device: ${info.reasons.join('; ')}.`
       : `Decided after your first answer, from a short speed test, graphics limits (needs maxBufferSize of at least ${(TIERING.minMaxBufferSize / 1024 ** 3).toFixed(0)} GiB, unmeasured) and free storage.`;
+    dlg.showModal(); // open at once; the storage figures arrive when the browser answers (it can be slow)
+    const line = $('#storage-line');
+    line.textContent = 'Reading storage figures…';
     try {
-      const est = await navigator.storage.estimate();
-      const persisted = await navigator.storage.persisted?.();
-      $('#storage-line').textContent = `Using ${formatMB(est.usage ?? 0)} of ${formatMB(est.quota ?? 0, 0)} · ${persisted ? 'kept' : 'not guaranteed to be kept'} by the browser`;
+      const answer = Promise.all([navigator.storage.estimate(), navigator.storage.persisted?.()]);
+      const [est, persisted] = await Promise.race([answer, new Promise((_, no) => setTimeout(() => no(new Error('timeout')), 4000))]);
+      line.textContent = `Using ${formatMB(est.usage ?? 0)} of ${formatMB(est.quota ?? 0, 0)} · ${persisted ? 'kept' : 'not guaranteed to be kept'} by the browser`;
     } catch {
-      $('#storage-line').textContent = 'Storage figures are not available in this browser.';
+      line.textContent = 'Storage figures are not available right now.';
     }
-    dlg.showModal();
   };
 
   document.addEventListener('click', (e) => {
@@ -496,7 +517,8 @@ function wireSettings(session) {
   document.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
     const t = e.target;
-    if (t.closest?.('input, textarea, select, [contenteditable="true"]') || document.querySelector('dialog[open]')) return;
+    const field = t.closest?.('input, textarea, select, [contenteditable="true"]');
+    if ((field && field.offsetParent !== null) || document.querySelector('dialog[open]')) return;
     const k = e.key.toLowerCase();
     const pick = (sel) => {
       const el = $$(sel).find((x) => x.offsetParent !== null);

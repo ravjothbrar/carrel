@@ -1,0 +1,41 @@
+name: pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: Check the precache manifest is current
+        run: |
+          node tools/build-sw-manifest.mjs
+          git diff --exit-code precache.json sw.js
+      # Publish only what the app needs: no tests, tools, node_modules or build files.
+      - name: Assemble site
+        run: |
+          mkdir _site
+          cp -r index.html sw.js precache.json manifest.webmanifest css js vendor fonts icons docs sample _site/
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

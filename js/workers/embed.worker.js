@@ -11,7 +11,7 @@ import { AutoConfig, EmbeddingGemma2Model, EmbeddingGemma2Processor, RawImage } 
 import { EMBED } from '../config.js';
 import { pickEmbedding, rowsOf } from '../embed-output.js';
 import { STARTUP_TEXTS, assertGoodVector, planBatches, startupCheck } from '../vectors.js';
-import { cacheStatus, modelFiles, weightSizes } from './hf.js';
+import { cacheStatus, downloadPlan, modelFiles, weightSizes } from './hf.js';
 import { classifyGpuError, makeProgressReporter, resourceHosts, serve, setupRuntime, watchDeviceLoss, withTransfer } from './runtime.js';
 
 setupRuntime();
@@ -30,7 +30,7 @@ async function load(_, progress) {
   loading ??= (async () => {
     if (!navigator.gpu) throw Object.assign(new Error('WebGPU is not available in this browser.'), { name: 'NoWebGPU' });
     const t0 = performance.now();
-    const report = makeProgressReporter(progress);
+    const report = makeProgressReporter(progress, await downloadPlan(EMBED.id, EMBED.revision, await files()));
     // Dropping audio_config is how Transformers.js is told not to fetch audio_encoder.
     const config = await AutoConfig.from_pretrained(EMBED.id, { revision: EMBED.revision });
     delete config.audio_config;
@@ -44,8 +44,8 @@ async function load(_, progress) {
     });
     watchDeviceLoss((m) => self.postMessage(m));
     // Startup check: reject NaN, all-zero, wrong-size or non-sensical vectors before anything is stored.
-    const vecs = await embedTexts({ texts: STARTUP_TEXTS.map((t) => `task: search result | query: ${t}`) });
-    health = startupCheck(vecs.vectors, EMBED.dim);
+    const vecs = await embedBatch(STARTUP_TEXTS.map((t) => `task: search result | query: ${t}`));
+    health = startupCheck(vecs, EMBED.dim);
     return { ms: Math.round(performance.now() - t0), health };
   })().catch((e) => {
     loading = null;
@@ -57,6 +57,12 @@ async function load(_, progress) {
 }
 
 async function embedTexts({ texts }, progress) {
+  const vectors = await embedBatch(texts, progress);
+  return withTransfer({ vectors }, vectors.map((v) => v.buffer));
+}
+
+/** @returns {Promise<Float32Array[]>} one validated, unit-length vector per text, in input order */
+async function embedBatch(texts, progress) {
   if (!model) throw new Error('The embedding model is not loaded.');
   const lengths = texts.map((t) => {
     try {
@@ -85,7 +91,7 @@ async function embedTexts({ texts }, progress) {
     done += batch.length;
     progress?.({ kind: 'embed', done, total: texts.length });
   }
-  return withTransfer({ vectors }, vectors.map((v) => v.buffer));
+  return vectors;
 }
 
 async function embedImages({ blobs }, progress) {

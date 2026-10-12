@@ -1,0 +1,23 @@
+name: test
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # --ignore-scripts: onnxruntime-node's postinstall downloads native binaries a browser app does not need
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - name: Check the precache manifest is current
+        run: |
+          node tools/build-sw-manifest.mjs
+          git diff --exit-code precache.json sw.js
+      # Browser tests, including the toy-model integration test (software WebGPU; skipped if unavailable).
+      - run: npm run test:e2e

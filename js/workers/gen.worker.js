@@ -10,15 +10,15 @@
 // 4.3.1 source only.
 
 import {
-  AutoProcessor,
   Gemma4ForCausalLM,
   Gemma4ForConditionalGeneration,
+  Gemma4Processor,
   InterruptableStoppingCriteria,
   RawImage,
   TextStreamer,
 } from '../../vendor/transformers/transformers.js';
 import { GENERATION, GENERATORS } from '../config.js';
-import { cacheStatus, modelFiles, prefetch, weightSizes } from './hf.js';
+import { cacheStatus, downloadPlan, modelFiles, prefetch, weightSizes } from './hf.js';
 import { classifyGpuError, makeProgressReporter, resourceHosts, serve, setupRuntime, watchDeviceLoss } from './runtime.js';
 
 setupRuntime();
@@ -53,8 +53,9 @@ async function load({ tier, vision = false }, progress) {
   loading = (async () => {
     const t0 = performance.now();
     await disposeCurrent();
-    const report = makeProgressReporter(progress);
-    const processor = await AutoProcessor.from_pretrained(cfg.id, { revision: cfg.revision, progress_callback: report });
+    const report = makeProgressReporter(progress, await downloadPlan(cfg.id, cfg.revision, await modelFiles(cfg.id, { dtype: dtypeFor(cfg), parts: partsFor(vision) })));
+    // Gemma4Processor directly: AutoProcessor would additionally insist on a preprocessor_config.json.
+    const processor = await Gemma4Processor.from_pretrained(cfg.id, { revision: cfg.revision, progress_callback: report });
     const Model = vision ? Gemma4ForConditionalGeneration : Gemma4ForCausalLM;
     const model = await Model.from_pretrained(cfg.id, {
       revision: cfg.revision,

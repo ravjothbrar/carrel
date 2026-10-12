@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="800" height="560">
+  <!-- Original drawing made for carrel. Dedicated to the public domain under CC0 1.0. -->
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#f6d27a" stop-opacity="0.9"/><stop offset="1" stop-color="#f6d27a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#23222b"/><stop offset="1" stop-color="#4a4a52"/></linearGradient>
+  </defs>
+  <rect width="800" height="560" fill="url(#sky)"/>
+  <circle cx="610" cy="215" r="120" fill="url(#glow)"/>
+  <rect x="0" y="470" width="800" height="90" fill="#1d1c22"/>
+  <path d="M0 478 H800" stroke="#6a6a72" stroke-width="2"/>
+  <!-- shafts resting on the road -->
+  <path d="M360 372 L120 466" stroke="#0f0f13" stroke-width="9" stroke-linecap="round"/>
+  <path d="M372 392 L150 474" stroke="#0f0f13" stroke-width="7" stroke-linecap="round"/>
+  <!-- cab body -->
+  <g fill="#0f0f13">
+    <path d="M340 270 h250 q30 0 30 30 v90 q0 14 -14 14 h-262 q-14 0 -14 -14 z"/>
+    <path d="M360 270 q10 -70 80 -78 h90 q40 0 52 78 z"/>
+    <rect x="610" y="150" width="14" height="150" rx="4"/>
+    <path d="M590 150 h70 v22 h-70 z"/>
+  </g>
+  <rect x="385" y="250" width="70" height="60" rx="4" fill="#f6d27a" opacity="0.85"/>
+  <rect x="480" y="250" width="70" height="60" rx="4" fill="#f6d27a" opacity="0.85"/>
+  <!-- lamp -->
+  <circle cx="352" cy="300" r="9" fill="#f6d27a"/>
+  <circle cx="352" cy="300" r="34" fill="url(#glow)"/>
+  <!-- wheels -->
+  <g fill="none" stroke="#0f0f13" stroke-width="10">
+    <circle cx="430" cy="420" r="62"/><circle cx="430" cy="420" r="10" fill="#0f0f13"/>
+    <path d="M430 358 V482 M368 420 H492 M386 376 L474 464 M474 376 L386 464" stroke-width="5"/>
+    <circle cx="590" cy="420" r="62"/><circle cx="590" cy="420" r="10" fill="#0f0f13"/>
+    <path d="M590 358 V482 M528 420 H652 M546 376 L634 464 M634 376 L546 464" stroke-width="5"/>
+  </g>
+  <!-- fog -->
+  <g fill="#d7d3c8">
+    <rect x="-40" y="380" width="520" height="38" rx="19" opacity="0.18"/>
+    <rect x="300" y="430" width="560" height="44" rx="22" opacity="0.22"/>
+    <rect x="-60" y="455" width="460" height="36" rx="18" opacity="0.2"/>
+    <rect x="420" y="320" width="420" height="30" rx="15" opacity="0.12"/>
+  </g>
+</svg>

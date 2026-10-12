@@ -1,0 +1,1 @@
+{"model_type": "embedding_gemma2", "architectures": ["EmbeddingGemma2Model"], "text_config": {"model_type": "gemma4_text", "hidden_size": 768}, "image_token_id": 4, "video_token_id": 5, "audio_token_id": 6}

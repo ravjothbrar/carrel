@@ -35,7 +35,10 @@ export function startServer({ root, port = 0, overrides = new Map() } = {}) {
     });
   });
   return new Promise((resolve) => {
-    server.listen(port, '127.0.0.1', () => resolve({ server, port: server.address().port, url: `http://127.0.0.1:${server.address().port}`, requests, overrides, close: () => new Promise((r) => server.close(r)) }));
+    server.listen(port, '127.0.0.1', () => {
+      server.unref(); // a leaked test server must never keep the process alive; the CLI below keeps itself alive
+      resolve({ server, port: server.address().port, url: `http://127.0.0.1:${server.address().port}`, requests, overrides, close: () => new Promise((r) => server.close(r)) });
+    });
   });
 }
 
@@ -43,4 +46,5 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const port = Number(process.argv[2] ?? process.env.PORT ?? 8080);
   const s = await startServer({ port });
   console.log(`carrel dev server: ${s.url}  (Ctrl-C to stop)`);
+  setInterval(() => {}, 1 << 30); // keep the process alive
 }

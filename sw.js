@@ -5,7 +5,7 @@
 // model files from Hugging Face are stored by Transformers.js in its own Cache Storage bucket, and
 // this worker must never see or alter them. No analytics, no remote config.
 
-const VERSION = 'da57f8f34b68'; // rewritten by tools/build-sw-manifest.mjs
+const VERSION = '8010ea3c51cf'; // rewritten by tools/build-sw-manifest.mjs
 const CACHE = `carrel-shell-${VERSION}`;
 const scope = self.registration.scope;
 

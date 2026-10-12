@@ -138,18 +138,25 @@ test('the prompt sent to the generator numbers the passages and demands citation
 test('keyboard hints work and settings has the larger-model toggle on by default', async () => {
   const app = await openApp(browser);
   const { page } = app;
-  const chooser = page.waitForEvent('filechooser');
+  // [U] must click the (hidden) file input. Count the click and cancel it, so no native dialog is left open.
+  await page.evaluate(() => {
+    window.__fileClicks = 0;
+    document.querySelector('#file-docs').addEventListener('click', (e) => { e.preventDefault(); window.__fileClicks++; });
+  });
   await page.keyboard.press('u');
-  await (await chooser).setFiles([]);
+  assert.equal(await page.evaluate(() => window.__fileClicks), 1);
   await page.keyboard.press('p');
   await page.waitForSelector('#paste-dialog[open]');
   await page.keyboard.press('Escape');
+  await page.waitForSelector('#paste-dialog', { state: 'hidden' });
   await page.keyboard.press('s');
   await page.waitForSelector('#settings-dialog[open]');
   assert.equal(await page.locator('#setting-large').isChecked(), true);
   assert.match(await page.locator('#settings-dialog').innerText(), /Use the larger model when this device can handle it/);
   await page.keyboard.press('Escape');
   await page.waitForSelector('#settings-dialog', { state: 'hidden' });
+  // closing a dialog must not strand keyboard focus inside it (a real bug this test once exposed)
+  assert.notEqual(await page.evaluate(() => document.activeElement.id), 'setting-large');
   await page.keyboard.press('h');
   await page.waitForFunction(() => location.hash === '#how');
   await app.close();

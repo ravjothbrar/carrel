@@ -11,6 +11,7 @@ export class NetCounter {
     this.count = 0; // requests to other hosts (model downloads) plus every request a model worker makes
     this.local = 0; // this site's own files fetched from the network after load
     this.blocked = 0;
+    this.failed = 0; // attempts that got no response (offline, blocked by the network)
     this.hosts = new Map();
     this.listeners = new Set();
   }
@@ -25,12 +26,17 @@ export class NetCounter {
   }
 
   snapshot() {
-    return { count: this.count, local: this.local, blocked: this.blocked, hosts: Object.fromEntries(this.hosts) };
+    return { count: this.count, local: this.local, failed: this.failed, blocked: this.blocked, hosts: Object.fromEntries(this.hosts) };
   }
 
   record(host) {
     this.count++;
     this.hosts.set(host, (this.hosts.get(host) ?? 0) + 1);
+    this.#emit();
+  }
+
+  recordFailed() {
+    this.failed++;
     this.#emit();
   }
 

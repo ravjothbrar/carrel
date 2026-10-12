@@ -36,6 +36,17 @@ export async function cacheStatus(id, revision, files) {
   return { cached: missing.length === 0 && !!cfg, missing };
 }
 
+/**
+ * What a load will really download: the weight files that are not in the cache yet, with their sizes.
+ * Transformers.js' own progress total also counts files it probes but never fetches (for example the
+ * audio and vision encoders on a text-only load), so carrel computes its own.
+ */
+export async function downloadPlan(id, revision, files) {
+  const { missing } = await cacheStatus(id, revision, files);
+  const { files: sizes } = await weightSizes(id, revision, missing);
+  return { missing: new Set(missing), bytes: missing.reduce((n, f) => n + (sizes[f] ?? 0), 0) };
+}
+
 /** Sizes of the weight files. Cached files answer from the cache; others make a one-byte ranged request. */
 export async function weightSizes(id, revision, files) {
   const entries = await Promise.all(

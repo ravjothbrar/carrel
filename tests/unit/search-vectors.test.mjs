@@ -38,7 +38,7 @@ test('assertGoodVector rejects NaN, all zeros, wrong size, wrong type and non-un
 });
 
 test('startupCheck passes for sensible vectors and fails for broken ones', () => {
-  const [a, b, c] = STARTUP_TEXTS.map((t) => fakeEmbed(t.replace('investigator', 'detective').replace('marks', 'footprints')));
+  assert.equal(STARTUP_TEXTS.length, 3);
   // lexical stand-in: make B related to A by sharing words
   const a2 = fakeEmbed('detective footprints window'), b2 = fakeEmbed('detective footprints glass'), c2 = fakeEmbed('quarterly tax filings');
   assert.ok(startupCheck([a2, b2, c2], 768).related > startupCheck([a2, b2, c2], 768).unrelated);

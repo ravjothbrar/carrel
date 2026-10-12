@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Measurement page. connect-src is deliberately wide (any https host) so the real redirect targets
+       of the model downloads show up; the app's own CSP then lists exactly what this finds. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob:; connect-src 'self' https:; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
+  <title>carrel spike</title>
+  <link rel="stylesheet" href="tools.css">
+  <script type="module" src="spike.js"></script>
+</head>
+<body>
+  <main>
+    <h1>carrel spike</h1>
+    <p>Measures what the README table needs, on <b>this</b> machine: model sizes, load times, decode speed, adapter limits, and which hosts the model files actually come from. Run it in current Chrome or Edge with WebGPU. Clear site data first for a cold download measurement.</p>
+    <p>
+      <label><input type="checkbox" id="do-e4b" checked> include E4B (downloads several GB)</label><br>
+      <label><input type="checkbox" id="do-vision"> include the vision-capable E2B load (image description)</label>
+    </p>
+    <p><button id="run">Run spike</button></p>
+    <pre id="log"></pre>
+    <h2>Result</h2>
+    <p>Copy this into the README's measured table and into <code>js/config.js</code> (TIERING, HF_HOSTS) and the CSP in <code>index.html</code>.</p>
+    <textarea id="result" rows="24" readonly></textarea>
+  </main>
+</body>
+</html>

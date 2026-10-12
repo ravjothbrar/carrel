@@ -9,12 +9,12 @@
 import { EMBED, GENERATION, GENERATORS, LIMITS, PREFIX, RETRIEVAL, SAMPLE, THRESHOLDS, embedKey } from './config.js';
 import { chunkSegments, locLabel } from './chunk.js';
 import { classifyFile, extractDocument, ExtractError, textFromPaste } from './extract.js';
-import { captionFromFilename, downscaleToJpeg, ImageError } from './image.js';
+import { captionFromFilename, downscaleToJpeg } from './image.js';
 import { decodePack, encodePack, PackError } from './pack.js';
 import { buildImageMessages, buildMessages, stripThinking } from './prompt.js';
 import { pickImage, VectorIndex } from './search.js';
 import { formatMB } from './text.js';
-import { decideUpgrade, readFailure, readSetting, writeFailure } from './tiering.js';
+import { clearFailure, decideUpgrade, readFailure, readSetting, writeFailure } from './tiering.js';
 import { analyseAnswer, judgeSentences, summarise } from './verify.js';
 
 export class ConsentDeclined extends Error {
@@ -188,7 +188,7 @@ export class Session extends EventTarget {
     this.genPromise = this.#loadGenerator('e2b').finally(() => {
       this.genPromise = null;
     });
-    this.genPromise.catch(() => {});
+    this.genPromise.catch((e) => this.notice(e.message)); // the first question would also surface it, but say so now
     return this.genPromise;
   }
 
@@ -626,6 +626,7 @@ export class Session extends EventTarget {
   /** Called when the user flips the setting. */
   settingChanged(on) {
     if (on) {
+      clearFailure(this.storage); // switching it on again is a deliberate request to try once more
       this.upgradeStarted = false;
       if (this.answeredOnce) setTimeout(() => this.#considerUpgrade(), 500);
     } else if (this.gen.tier === 'e4b') {

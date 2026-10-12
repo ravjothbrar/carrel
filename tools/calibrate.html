@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob:; connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
+  <title>carrel calibration</title>
+  <link rel="stylesheet" href="tools.css">
+  <script type="module" src="calibrate.js"></script>
+</head>
+<body>
+  <main>
+    <h1>carrel calibration</h1>
+    <p>Embeds a small labelled set (<code>calibration-set.json</code>, original text) with the real embedding model and reports the score distributions and the cut-offs that best separate the classes. Needs WebGPU and the embedding model. Paste the block at the bottom into <code>THRESHOLDS</code> in <code>js/config.js</code> and set <code>calibrated: true</code>.</p>
+    <p><button id="run">Run calibration</button></p>
+    <pre id="log"></pre>
+    <h2>Block for js/config.js</h2>
+    <textarea id="result" rows="20" readonly></textarea>
+  </main>
+</body>
+</html>

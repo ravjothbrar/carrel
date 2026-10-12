@@ -1,0 +1,4 @@
+body { font: 15px/1.5 system-ui, sans-serif; margin: 0; background: #f5f2eb; color: #1b1a17; }
+main { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; }
+pre, textarea { width: 100%; box-sizing: border-box; font: 12px/1.45 ui-monospace, monospace; background: #fff; border: 1px solid #bcb5a3; padding: .6rem; white-space: pre-wrap; }
+button { font: 600 13px ui-monospace, monospace; padding: .6rem 1rem; border: 1px solid #1b1a17; background: #d8452b; color: #fff; cursor: pointer; }

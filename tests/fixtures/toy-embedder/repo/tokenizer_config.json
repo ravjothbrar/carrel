@@ -1,0 +1,1 @@
+{"tokenizer_class": "PreTrainedTokenizer", "pad_token": "<pad>", "unk_token": "<unk>", "bos_token": "<bos>", "eos_token": "<eos>", "model_max_length": 8192, "image_token": "<|image|>", "video_token": "<|video|>", "audio_token": "<|audio|>", "boi_token": "<|image|>", "eoi_token": "<|image|>", "boa_token": "<|audio|>", "eoa_token": "<|audio|>"}
