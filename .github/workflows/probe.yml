@@ -1,0 +1,27 @@
+name: probe-models
+# Reads the real Hugging Face repos (no GPU): file layout, sizes, redirect hosts, configs, ONNX I/O names.
+on:
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/hf-probe.mjs
+      - name: ONNX input/output names (graph only, weights not loaded)
+        run: |
+          pip install --quiet onnx
+          for f in onnx/model_q4.onnx; do
+            curl -sSL --fail -o /tmp/embed.onnx "https://huggingface.co/onnx-community/embeddinggemma-2-ONNX/resolve/main/$f" && python3 tools/onnx-io.py /tmp/embed.onnx || echo "could not fetch $f"
+          done
+          for f in embed_tokens_q4f16 decoder_model_merged_q4f16 vision_encoder_q4f16; do
+            curl -sSL --fail -o /tmp/g.onnx "https://huggingface.co/onnx-community/gemma-4-E2B-it-ONNX/resolve/main/onnx/$f.onnx" && python3 tools/onnx-io.py /tmp/g.onnx || echo "could not fetch $f"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hf-probe
+          path: hf-probe.json

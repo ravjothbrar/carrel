@@ -25,7 +25,7 @@ test('index.html has no inline script or style, and the CSP is present', () => {
   assert.match(csp, /default-src 'none'/);
   assert.match(csp, /connect-src 'self' https:\/\/huggingface\.co/);
   assert.ok(!/unsafe-inline|unsafe-eval(?!.*wasm)/.test(csp.replace('wasm-unsafe-eval', '')), 'unsafe CSP keywords');
-  assert.ok(!/https?:\/\/(?!huggingface\.co|\*\.huggingface\.co|\*\.hf\.co|github\.com\/ravjothbrar)/.test(html.replace(/<!--[\s\S]*?-->/g, '')), 'external URL in HTML');
+  assert.ok(!/https?:\/\/(?!huggingface\.co|\*\.huggingface\.co|\*\.hf\.co|github\.com\/ravjothbrar|ravjothbrar\.com)/.test(html.replace(/<!--[\s\S]*?-->/g, '')), 'external URL in HTML');
 });
 
 test('no CDN or third-party hosts anywhere in shipped code', () => {

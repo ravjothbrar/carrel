@@ -250,3 +250,99 @@ body.no-webgpu main, body.no-webgpu .foot-right button { display: none; }
   .ask .btn { align-self: stretch; justify-content: center; padding-block: 0.8rem; }
   .topnav { flex-direction: column; gap: 0.25rem; align-items: flex-end; }
 }
+
+
+/* =============================================================================================
+   Polish layer: rounder, calmer, more spacious. Same paper, ink and single vermilion accent;
+   no gradients, glass or sparkle. Pill controls, rounded panels, larger display type.
+   ============================================================================================= */
+:root {
+  --surface: #fbf9f4;
+  --panel: #efebe0;
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 26px;
+  --pill: 999px;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --surface: #1a1914; --panel: #1f1e18; }
+}
+
+.top { padding-block: 1.5rem 0; align-items: center; }
+.topnav { align-items: center; gap: 0.35rem; padding-top: 0; flex-wrap: wrap; justify-content: flex-end; }
+.topnav a { padding: 0.5rem 0.8rem; border-radius: var(--pill); transition: background-color 0.15s, color 0.15s; }
+.topnav a:hover { background: var(--panel); color: var(--ink); }
+.topnav .creator { color: var(--ink); border: 1px solid var(--rule-strong); text-transform: none; letter-spacing: 0.01em; font-size: 0.78rem; margin-left: 0.3rem; }
+.topnav .creator b { font-weight: 600; }
+.topnav .creator:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+kbd { border-radius: 6px; padding: 0.05em 0.4em; }
+
+.hero { padding-block: clamp(3rem, 9vw, 6.5rem) clamp(2rem, 4.5vw, 3.25rem); }
+.hero h1 { font-weight: 500; font-size: clamp(2.9rem, 9vw, 7rem); line-height: 0.94; letter-spacing: -0.055em; max-width: 12ch; }
+.hero .sub { font-size: clamp(1.125rem, 1.8vw, 1.4rem); max-width: 34ch; margin-top: 1.6rem; line-height: 1.45; }
+
+/* the window */
+.window { border-radius: var(--r-lg); background: var(--surface); overflow: hidden; border-color: var(--rule-strong); }
+.window-bar { background: var(--panel); border-bottom-color: var(--rule); padding: 0.75rem 1.25rem; }
+.status-wrap, .notice, .consent { border-bottom-style: solid; border-bottom-color: var(--rule); }
+.status-row { padding-inline: 1.25rem; }
+.notice { padding-inline: 1.25rem; }
+.empty { padding: clamp(1.1rem, 3vw, 2rem); }
+.dropzone { border-radius: var(--r-md); border: 1.5px dashed var(--rule-strong); background: color-mix(in srgb, var(--panel) 45%, transparent); padding: clamp(1.75rem, 6vw, 3.5rem); }
+.dropzone h2 { font-weight: 500; font-size: clamp(1.9rem, 4.4vw, 3.1rem); letter-spacing: -0.045em; }
+.dz-hint { font-size: 1.0625rem; }
+.sample-line { margin-top: 1.25rem; font-size: 0.9375rem; }
+.desk { padding: clamp(1.1rem, 3vw, 2rem); }
+.consent { padding: clamp(1.1rem, 3vw, 2rem); }
+
+/* pill buttons */
+.btn { border-radius: var(--pill); padding: 0.8rem 1.2rem; border: 1px solid var(--rule-strong); background: var(--surface); }
+.btn:hover:not(:disabled) { background: var(--ink); border-color: var(--ink); }
+.btn.primary { border-color: var(--accent); }
+.btn.primary:hover:not(:disabled) { background: var(--ink); border-color: var(--ink); }
+.btn.small { padding: 0.5rem 0.85rem; }
+.btn.quiet { background: transparent; border-color: transparent; }
+.btn.danger { background: transparent; }
+.badge { border-radius: var(--r-sm); background: color-mix(in srgb, var(--accent) 7%, transparent); border-width: 1px; padding: 0.65rem 0.9rem; }
+.tag, .flag { border-radius: var(--pill); padding: 0.1em 0.65em; }
+.flag { padding-block: 0.05em; }
+.note-n { border-radius: 6px; }
+
+textarea, input[type="text"] { border-radius: var(--r-md); background: var(--surface); padding: 0.9rem 1.1rem; border-color: var(--rule-strong); }
+#question { font-size: 1.1875rem; }
+.shelf-list { border-top: 0; display: grid; gap: 0.5rem; margin-top: 0.9rem; }
+.shelf-list li { border: 1px solid var(--rule); border-radius: var(--r-md); padding: 0.7rem 0.9rem; background: color-mix(in srgb, var(--panel) 30%, transparent); }
+.shelf-item-thumb { border-radius: 8px; }
+
+/* answers */
+.sheet { padding-block: 2.5rem; }
+.sheet-q { font-weight: 500; font-size: clamp(1.6rem, 3.2vw, 2.4rem); letter-spacing: -0.045em; }
+.answer { font-size: 1.25rem; }
+.margin { border-left: 0; background: color-mix(in srgb, var(--panel) 55%, transparent); border-radius: var(--r-md); padding: 1.1rem 1.2rem; align-self: start; }
+.figure img { border-radius: var(--r-md); }
+.desc { border-left-color: var(--accent); }
+
+/* the lower sections become calm rounded panels */
+.band { background: color-mix(in srgb, var(--panel) 60%, transparent); border: 0; border-radius: var(--r-lg); padding: clamp(1.5rem, 4vw, 2.75rem); margin-top: 1.25rem; }
+main > .band:first-of-type { margin-top: 2rem; }
+.band-body h2 { font-weight: 500; font-size: clamp(1.6rem, 3vw, 2.4rem); letter-spacing: -0.045em; }
+.counter-line strong { font-weight: 500; }
+
+.dialog { border-radius: var(--r-lg); border-color: var(--rule-strong); padding: 1.75rem; background: var(--surface); }
+.unsupported .preview img { border-radius: var(--r-lg); }
+
+/* footer */
+.foot { border-top: 0; margin-top: 2.5rem; padding-top: 0.5rem; }
+.foot-creator { color: var(--ink); text-underline-offset: 3px; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 1.5px; }
+.foot-creator:hover { color: var(--accent-text); }
+.model-line #model-state { color: var(--ink); }
+
+textarea, input[type="text"], #question { border-radius: var(--r-md); }
+textarea:focus-visible, input[type="text"]:focus-visible { outline-offset: 2px; }
+
+@media (max-width: 52rem) {
+  .top { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .topnav { flex-direction: row; align-items: center; justify-content: flex-start; margin-left: -0.8rem; }
+  .topnav .creator { margin-left: 0; }
+  .margin { padding: 1rem; }
+}

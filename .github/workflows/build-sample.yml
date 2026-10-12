@@ -1,0 +1,42 @@
+name: build-sample
+# Builds sample/sherlock.carrel with the real EmbeddingGemma 2 (q4, 768-d) in headless Chromium with WebGPU.
+# GitHub runners have no GPU, so this uses Chromium's software WebGPU adapter (SwiftShader). It is slow but it is
+# the same model, dtype and code path; the adapter is recorded in the pack's metadata, and parity.mjs checks the
+# stored vectors by re-embedding in the browser.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Build the pack
+        env:
+          CARREL_ALLOW_SOFTWARE_GPU: '1'
+        run: node tools/build-sample.mjs 2>&1 | tee build.log
+      - name: Parity test (re-embed in the browser, compare with the stored vectors)
+        env:
+          CARREL_ALLOW_SOFTWARE_GPU: '1'
+        run: node tools/parity.mjs 2>&1 | tee parity.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sample-build-logs
+          path: |
+            build.log
+            parity.log
+      - name: Commit the pack
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sample/sherlock.carrel precache.json sw.js
+          git commit -m "Add sample pack: Sherlock Holmes stories, embedded with EmbeddingGemma 2 (built in CI)"
+          git push

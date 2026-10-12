@@ -26,9 +26,17 @@ const WANTED = ['A Scandal in Bohemia', 'The Red-Headed League', 'The Adventure 
 async function getText() {
   const i = process.argv.indexOf('--text');
   if (i > -1) return { raw: fs.readFileSync(process.argv[i + 1], 'utf8'), how: `local copy ${process.argv[i + 1]}` };
-  const res = await fetch(SOURCE_URL);
-  if (!res.ok) throw new Error(`Could not fetch ${SOURCE_URL}: HTTP ${res.status}`);
-  return { raw: await res.text(), how: SOURCE_URL };
+  let last = '';
+  for (const url of [SOURCE_URL, 'https://www.gutenberg.org/files/1661/1661-0.txt', 'https://www.gutenberg.org/ebooks/1661.txt.utf-8']) {
+    try {
+      const res = await fetch(url, { headers: { 'User-Agent': 'carrel-sample-build (https://github.com/ravjothbrar/carrel)' } });
+      if (res.ok) return { raw: await res.text(), how: url };
+      last = `${url}: HTTP ${res.status}`;
+    } catch (e) {
+      last = `${url}: ${e.message}`;
+    }
+  }
+  throw new Error(`Could not fetch the text from Project Gutenberg (${last}). Download it yourself and pass --text file.txt`);
 }
 
 const { raw, how } = await getText();
