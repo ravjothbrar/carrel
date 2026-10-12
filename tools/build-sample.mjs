@@ -43,7 +43,15 @@ async function getText() {
 }
 
 const { raw, how } = await getText();
-const body = stripGutenberg(raw);
+console.log(`fetched ${raw.length} characters from ${how}`);
+let body;
+try {
+  body = stripGutenberg(raw);
+} catch (e) {
+  console.error(`${e.message}\nFirst 300 characters: ${JSON.stringify(raw.slice(0, 300))}\nLines containing "***":`);
+  raw.split(/\r?\n/).forEach((l, i) => l.includes('***') && console.error(`  ${i + 1}: ${JSON.stringify(l.slice(0, 120))}`));
+  throw e;
+}
 let stories;
 try {
   stories = pickStories(splitStories(body), WANTED);
