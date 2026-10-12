@@ -8,7 +8,10 @@ before(async () => { browser = await launch(); });
 after(async () => { await browser.close(); });
 
 const PNG = '/tmp/carrel-test/hansom_cab.png';
-before(() => fs.writeFileSync(PNG, makePng(1200, 800, [60, 60, 70])));
+before(() => {
+  fs.mkdirSync('/tmp/carrel-test', { recursive: true });
+  fs.writeFileSync(PNG, makePng(1200, 800, [60, 60, 70]));
+});
 
 async function addImage(page, keywords) {
   await page.evaluate((k) => { window.__fakeImageKeywords = [k]; }, keywords);

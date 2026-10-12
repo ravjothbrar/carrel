@@ -5,6 +5,8 @@ name: build-sample
 # stored vectors by re-embedding in the browser.
 on:
   workflow_dispatch:
+  push:
+    paths: ['.github/triggers/build-sample']
 permissions:
   contents: write
 jobs:

@@ -156,7 +156,7 @@ test('keyboard hints work and settings has the larger-model toggle on by default
   await page.keyboard.press('Escape');
   await page.waitForSelector('#settings-dialog', { state: 'hidden' });
   // closing a dialog must not strand keyboard focus inside it (a real bug this test once exposed)
-  assert.notEqual(await page.evaluate(() => document.activeElement.id), 'setting-large');
+  await page.waitForFunction(() => document.activeElement.id !== 'setting-large'); // the close event restores focus a tick later
   await page.keyboard.press('h');
   await page.waitForFunction(() => location.hash === '#how');
   await app.close();

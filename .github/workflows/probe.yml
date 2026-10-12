@@ -2,6 +2,8 @@ name: probe-models
 # Reads the real Hugging Face repos (no GPU): file layout, sizes, redirect hosts, configs, ONNX I/O names.
 on:
   workflow_dispatch:
+  push:
+    paths: ['.github/triggers/probe']
 jobs:
   probe:
     runs-on: ubuntu-latest

@@ -66,7 +66,7 @@ test('workers inherit the page CSP only when started from the blob wrapper', asy
   await server.close();
 });
 
-test('real worker plumbing: boots, reports honestly, counts its one allowed host', async () => {
+test('real worker plumbing: boots, answers (or fails cleanly), counts only the allowed host', async () => {
   const PAGE_REAL = `<!doctype html><meta charset=utf-8><meta http-equiv="Content-Security-Policy" content="${CSP}"><title>real</title><script type="module" src="/__real.js"></script>`;
   const REAL_JS = `
 import { createEngine } from '/js/engine-client.js';
@@ -86,12 +86,15 @@ window.__real = { outcome, ms: performance.now() - t0, net: net.snapshot() };
   await page.goto(server.url + '/__real.html');
   await page.waitForFunction(() => window.__real, null, { timeout: 60000 });
   const r = await page.evaluate(() => window.__real);
-  // No Hugging Face access in the sandbox, so the call must fail cleanly (not hang, not crash the page)...
-  assert.equal(r.outcome.ok, false);
-  assert.ok(r.outcome.message.length > 0);
-  // ...but only after the worker really started, loaded the vendored library, and tried the allowed host
-  // (no answer came back in the sandbox, so it is counted as a failed attempt, not as a request made).
-  assert.ok(r.net.count + r.net.failed >= 1, JSON.stringify(r.net));
+  // Whether Hugging Face is reachable depends on where this runs (blocked in the original build sandbox,
+  // open on GitHub's runners). Either way the call must finish cleanly and the worker must have really
+  // started, loaded the vendored library and tried the allowed host.
+  if (r.outcome.ok) assert.ok(r.net.count >= 1, JSON.stringify(r.net));
+  else {
+    assert.ok(r.outcome.message.length > 0);
+    assert.ok(r.net.count + r.net.failed >= 1, JSON.stringify(r.net));
+  }
+  assert.ok(Object.keys(r.net.hosts).every((h) => h === 'huggingface.co'), JSON.stringify(r.net.hosts));
   assert.deepEqual(errors, []);
   await ctx.close();
   await server.close();
