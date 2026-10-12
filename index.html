@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+    Content Security Policy. connect-src is the network rule: this origin, plus the Hugging Face hosts
+    the model files come from. Workers are started from blob wrappers so they inherit this policy.
+    The Hugging Face host list is UNVERIFIED until tools/spike.html has recorded the real redirect targets.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob:; font-src 'self'; connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co; worker-src 'self' blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#F5F2EB" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#151410" media="(prefers-color-scheme: dark)">
+  <title>carrel</title>
+  <meta name="description" content="Ask your documents. They stay put. A private research assistant that runs Gemma on your device, in a browser tab.">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#app">Skip to the app</a>
+
+  <header class="top">
+    <div class="brand">
+      <a class="wordmark" href="./" aria-label="carrel, home">carrel</a>
+      <p class="definition mono"><span>carrel</span> <i>n.</i> a private desk in a library</p>
+    </div>
+    <nav class="topnav mono" aria-label="Site">
+      <a href="#how" data-key="h"><kbd>H</kbd> How it works</a>
+      <a href="https://github.com/ravjothbrar/carrel" data-key="g" rel="noopener noreferrer" target="_blank"><kbd>G</kbd> GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="headline">
+      <h1 id="headline">Ask your documents.<br>They stay put.</h1>
+      <p class="sub">Add your own files, ask a question, get an answer with its sources beside it. It runs on this device, and keeps running with the network off.</p>
+    </section>
+
+    <section id="app" class="window" aria-label="carrel desk" tabindex="-1">
+      <div class="window-bar mono">
+        <span class="window-title">carrel <span class="dim">/ your desk</span></span>
+        <span class="window-stats" aria-live="off">
+          <span id="stat-docs">0 documents</span>
+          <span id="stat-chunks">0 chunks indexed</span>
+          <span id="stat-tps" hidden></span>
+        </span>
+      </div>
+
+      <div id="status" class="status-wrap" role="status" aria-live="polite" hidden></div>
+
+      <div id="notice" class="notice" role="alert" hidden>
+        <p id="notice-text"></p>
+        <button type="button" id="notice-close" class="btn quiet mono">Dismiss</button>
+      </div>
+
+      <!-- Consent panel: shown before the first model download -->
+      <div id="consent" class="consent" hidden>
+        <p class="eyebrow mono">ONE-TIME DOWNLOAD</p>
+        <h2>carrel needs two models on this device.</h2>
+        <p id="consent-copy"></p>
+        <dl id="consent-sizes" class="sizes mono"></dl>
+        <p class="fine">They come from Hugging Face, once, and are kept in this browser. After that carrel works with no connection. Nothing you add is uploaded anywhere.</p>
+        <div class="actions">
+          <button type="button" id="consent-go" class="btn primary mono" disabled><kbd>D</kbd> <span id="consent-go-label">Download</span></button>
+          <button type="button" id="consent-cancel" class="btn mono">Not now</button>
+        </div>
+      </div>
+
+      <!-- Default state: upload first -->
+      <div id="view-empty" class="empty">
+        <p class="eyebrow mono">ADD YOUR OWN</p>
+        <div id="dropzone" class="dropzone" tabindex="0" role="group" aria-labelledby="dz-title">
+          <h2 id="dz-title">Add your own documents</h2>
+          <p class="dz-hint">Text, Markdown and PDF files, or images. Drop them here.</p>
+          <div class="actions">
+            <button type="button" class="btn primary mono" data-action="upload"><kbd>U</kbd> Upload</button>
+            <button type="button" class="btn mono" data-action="paste"><kbd>P</kbd> Paste text</button>
+            <button type="button" class="btn mono" data-action="images"><kbd>M</kbd> Drop images</button>
+          </div>
+        </div>
+        <p class="sample-line"><span>No documents handy?</span> <button type="button" class="linklike" data-action="sample">Try a sample (Sherlock Holmes stories)</button></p>
+        <p id="empty-note" class="fine"></p>
+      </div>
+
+      <!-- Desk: after something has been added -->
+      <div id="view-desk" class="desk" hidden>
+        <div id="sample-badge" class="badge mono" hidden>
+          <span>Sample pack: add your own documents to use this for real</span>
+          <button type="button" class="btn mono small" data-action="remove-sample">Remove sample</button>
+        </div>
+
+        <section class="shelf" aria-labelledby="shelf-title">
+          <div class="shelf-head">
+            <h2 id="shelf-title" class="eyebrow mono">ON THE DESK</h2>
+            <div class="actions">
+              <button type="button" class="btn mono small" data-action="upload"><kbd>U</kbd> Upload</button>
+              <button type="button" class="btn mono small" data-action="paste"><kbd>P</kbd> Paste text</button>
+              <button type="button" class="btn mono small" data-action="images"><kbd>M</kbd> Images</button>
+            </div>
+          </div>
+          <ul id="shelf-list" class="shelf-list"></ul>
+        </section>
+
+        <form id="ask" class="ask" autocomplete="off">
+          <label for="question" class="eyebrow mono">ASK A QUESTION</label>
+          <div class="ask-row">
+            <textarea id="question" name="question" rows="2" maxlength="600" placeholder="What do your documents say about…" spellcheck="true"></textarea>
+            <button type="submit" id="ask-go" class="btn primary mono"><kbd>↵</kbd> Ask</button>
+          </div>
+          <p class="fine" id="ask-note">Answers come from a small model running on this device. It can be wrong, so every claim shows its source.</p>
+        </form>
+
+        <div id="sheets" class="sheets" aria-live="polite"></div>
+      </div>
+
+      <div id="drop-overlay" class="drop-overlay mono" hidden>Drop to add</div>
+    </section>
+
+    <section class="band" aria-labelledby="offline-title">
+      <p class="eyebrow mono">WORKS OFFLINE</p>
+      <div class="band-body">
+        <h2 id="offline-title">Load it once. After that, no connection needed.</h2>
+        <p>carrel is a web app you can install. The models and the page are kept in this browser, so you can open it from your home screen or desktop with the network off.</p>
+        <p class="actions">
+          <button type="button" id="install" class="btn mono" hidden><kbd>I</kbd> Install app</button>
+          <span id="offline-state" class="mono dim"></span>
+        </p>
+      </div>
+    </section>
+
+    <section id="verify" class="band" aria-labelledby="verify-title">
+      <p class="eyebrow mono">VERIFY IT YOURSELF</p>
+      <div class="band-body">
+        <h2 id="verify-title">Don't take our word for it.</h2>
+        <ol class="steps">
+          <li>Open carrel once and let the models download.</li>
+          <li>Switch on airplane mode, or turn off Wi-Fi, and reload the page.</li>
+          <li>Add a document and ask a question. You still get a cited answer.</li>
+        </ol>
+        <p class="counter-line mono"><strong id="verify-count">0</strong> <span>requests to other sites since this page loaded</span></p>
+        <p id="verify-hosts" class="mono dim"></p>
+        <p id="verify-local" class="mono dim"></p>
+        <p class="fine">This counts what the page itself can see: every request to another site, and every request the model workers make. Files from this site that are fetched after load are listed separately and read 0 once the offline copy is installed. Blocked attempts: <span id="verify-blocked" class="mono">0</span>. Your browser's network panel is the independent check.</p>
+      </div>
+    </section>
+
+    <section id="how" class="band" aria-labelledby="how-title">
+      <p class="eyebrow mono">HOW IT WORKS</p>
+      <div class="band-body">
+        <h2 id="how-title">Four steps, all on this device.</h2>
+        <ol class="steps">
+          <li><b>Add.</b> Files are split into passages of about 300 tokens and turned into vectors by EmbeddingGemma 2. Images go into the same search.</li>
+          <li><b>Ask.</b> Your question is embedded and compared with every passage. If nothing is close enough, carrel says <i>That isn't in your documents</i> and does not call the answer model.</li>
+          <li><b>Answer.</b> Gemma 4 writes a short answer from five passages, citing them by number. The passages sit in the margin.</li>
+          <li><b>Check.</b> Each sentence of the answer is compared with the passages it cites. Weak matches are marked <i>not clearly supported by your documents</i>.</li>
+        </ol>
+        <h3 class="mono">WHAT IT IS NOT</h3>
+        <ul class="plain">
+          <li>It is a small model. It can misread a passage, and the check is a similarity score, not proof.</li>
+          <li>Scanned PDFs are not supported: there is no OCR. Audio is not supported.</li>
+          <li>Needs Chrome or Edge with WebGPU. There is no CPU fallback.</li>
+          <li id="calibration-note"></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot mono">
+    <p id="model-line" class="model-line"><span id="model-name">Gemma 4 E2B</span> · <span id="model-state">not downloaded yet</span><span id="model-extra" class="dim"></span></p>
+    <p><a href="#verify" id="net-line"><span id="net-count">0</span> <span id="net-label">network requests</span></a></p>
+    <p class="foot-right"><button type="button" class="linklike mono" id="open-settings"><kbd>S</kbd> Settings</button> <span class="dim">·</span> <span>Apache-2.0</span></p>
+  </footer>
+
+  <!-- Hidden file inputs -->
+  <input id="file-docs" type="file" multiple accept=".txt,.text,.md,.markdown,.csv,.log,.pdf,text/plain,text/markdown,application/pdf,image/*,.carrel" hidden>
+  <input id="file-images" type="file" multiple accept="image/*" hidden>
+  <input id="file-pack" type="file" accept=".carrel,application/octet-stream" hidden>
+
+  <dialog id="paste-dialog" class="dialog" aria-labelledby="paste-title">
+    <form method="dialog" id="paste-form">
+      <h2 id="paste-title" class="eyebrow mono">PASTE TEXT</h2>
+      <label for="paste-name" class="mono small-label">Title (optional)</label>
+      <input id="paste-name" type="text" maxlength="120" placeholder="Meeting notes, chapter 3…">
+      <label for="paste-text" class="mono small-label">Text</label>
+      <textarea id="paste-text" rows="10" placeholder="Paste or type here"></textarea>
+      <div class="actions">
+        <button type="submit" value="add" class="btn primary mono" id="paste-add">Add to desk</button>
+        <button type="button" class="btn mono" id="paste-cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settings-dialog" class="dialog" aria-labelledby="settings-title">
+    <h2 id="settings-title" class="eyebrow mono">SETTINGS</h2>
+    <label class="check">
+      <input type="checkbox" id="setting-large">
+      <span>Use the larger model when this device can handle it</span>
+    </label>
+    <p class="fine" id="setting-large-note"></p>
+    <h3 class="mono small-label">KNOWLEDGE PACK</h3>
+    <div class="actions">
+      <button type="button" class="btn mono small" id="export-pack"><kbd>E</kbd> Export my documents</button>
+      <button type="button" class="btn mono small" id="import-pack">Import a .carrel pack</button>
+    </div>
+    <p class="fine">A pack is one file with your passages, images and their vectors. Share it, or import it on another device that uses the same embedding model.</p>
+    <h3 class="mono small-label">THIS DEVICE</h3>
+    <p class="mono small" id="storage-line"></p>
+    <div class="actions">
+      <button type="button" class="btn mono small danger" id="clear-all">Clear everything carrel stored</button>
+    </div>
+    <p class="fine">Clearing removes your documents and settings. Downloaded models stay in the browser cache; clear site data in your browser to remove those too.</p>
+    <div class="actions"><button type="button" class="btn primary mono" id="settings-close">Done</button></div>
+  </dialog>
+
+  <!-- Shown instead of the app on browsers without WebGPU -->
+  <section id="unsupported" class="unsupported" hidden aria-labelledby="unsupported-title">
+    <p class="eyebrow mono">THIS NEEDS A WEBGPU BROWSER</p>
+    <h2 id="unsupported-title">carrel runs Gemma on your graphics chip, and this browser can't offer one.</h2>
+    <p id="unsupported-reason"></p>
+    <p>Try current Chrome or Edge on a laptop or desktop. There is no slower fallback: a model this size on a CPU would take minutes per answer.</p>
+    <figure class="preview">
+      <img loading="lazy" src="docs/preview-empty.png" alt="Screenshot of the carrel start screen: a bordered box titled Add your own documents, with Upload and Paste text buttons." width="1200" height="960">
+      <figcaption class="mono"><span>PREVIEW</span> The start screen. Screenshots show the interface only, not model output.</figcaption>
+    </figure>
+  </section>
+</body>
+</html>

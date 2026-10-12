@@ -1,0 +1,91 @@
+{
+  "_note": "Original text written for carrel (CC0). A small fictional town, so no model has seen it. Passages, questions that a passage answers, questions it does not (near-topic and far-topic), and claims that a passage does or does not support.",
+  "passages": [
+    { "id": "p1", "title": "Marrow Point lighthouse", "text": "The Marrow Point lighthouse was built in 1874 from grey granite quarried nearby. Its lamp was converted from oil to electricity in 1952, and the keeper's cottage was sold the following decade." },
+    { "id": "p2", "title": "Hartley's bakery", "text": "Hartley's bakery opens at five each morning. Its sourdough uses a starter that the founder's grandmother began in 1931, fed daily with rye flour. The shop closes on Mondays." },
+    { "id": "p3", "title": "The Number 9 tram", "text": "The Number 9 tram links the station with the university every eight minutes during term time. A single fare costs two pounds forty, and children under seven travel free." },
+    { "id": "p4", "title": "Community orchard", "text": "The community orchard has forty-two apple trees, mostly Bramley and Cox varieties. Volunteers prune in February and the harvest festival is held on the first Saturday of October." },
+    { "id": "p5", "title": "Hilltop observatory", "text": "The hilltop observatory houses a refracting telescope with a 15-inch lens. Public viewing nights run on the second Friday of each month, weather permitting." },
+    { "id": "p6", "title": "The canal", "text": "The canal was dug by hand in the 1790s to carry coal to the mills. It is eleven miles long and has fourteen locks, the deepest of which drops three metres." },
+    { "id": "p7", "title": "Town library", "text": "The town library lends tools as well as books. Members can borrow drills, ladders and sewing machines for up to two weeks, and there is a waiting list for the pressure washer." },
+    { "id": "p8", "title": "The 1987 flood", "text": "In the flood of 1987 the river rose four metres in one night. Sandbags were stacked outside the market hall and sixty families were housed in the school gymnasium." },
+    { "id": "p9", "title": "Wednesday choir", "text": "The Wednesday choir rehearses at seven in the church hall. New members are welcome without an audition, and the winter concert raises money for the food bank." },
+    { "id": "p10", "title": "The iron footbridge", "text": "The iron footbridge over the weir was repaired in 2019 after inspectors found cracks in two of its supports. It reopened in March, painted dark green." }
+  ],
+  "answerable": [
+    { "q": "When was the lighthouse lamp switched to electric power?", "p": "p1" },
+    { "q": "What is the bakery's sourdough starter fed with?", "p": "p2" },
+    { "q": "How often does the university tram run?", "p": "p3" },
+    { "q": "How many apple trees grow in the community orchard?", "p": "p4" },
+    { "q": "What size is the observatory telescope's lens?", "p": "p5" },
+    { "q": "How many locks does the canal have?", "p": "p6" },
+    { "q": "Can I borrow a ladder from the library?", "p": "p7" },
+    { "q": "How high did the river rise during the 1987 flood?", "p": "p8" },
+    { "q": "Do I need to audition to join the choir?", "p": "p9" },
+    { "q": "Why was the footbridge repaired?", "p": "p10" }
+  ],
+  "unanswerable_near": [
+    "Who designed the Marrow Point lighthouse?",
+    "Which flour does Hartley's use for its white loaf?",
+    "How much does a monthly tram pass cost?",
+    "Which apple variety won the orchard's prize last year?",
+    "Who donated the observatory's telescope?",
+    "What cargo does the canal carry today?",
+    "Does the library lend books in other languages?",
+    "How many people died in the 1987 flood?",
+    "Who conducts the Wednesday choir?",
+    "What is the weight limit of the footbridge?"
+  ],
+  "unanswerable_far": [
+    "What is the capital of Australia?",
+    "How do I reset my home router?",
+    "Explain how vaccines train the immune system.",
+    "What was the score of the last World Cup final?",
+    "Who wrote the play Hamlet?"
+  ],
+  "supported": [
+    { "claim": "The lighthouse was made of granite from a local quarry.", "p": "p1" },
+    { "claim": "The lamp at Marrow Point went electric in 1952.", "p": "p1" },
+    { "claim": "The bakery opens very early, at 5am.", "p": "p2" },
+    { "claim": "Hartley's is shut on Mondays.", "p": "p2" },
+    { "claim": "Trams on route 9 come every eight minutes in term time.", "p": "p3" },
+    { "claim": "Young children under seven ride the tram for free.", "p": "p3" },
+    { "claim": "Most of the orchard's trees are Bramleys and Coxes.", "p": "p4" },
+    { "claim": "The harvest festival takes place in early October.", "p": "p4" },
+    { "claim": "Visitors can look through the telescope on the second Friday of each month.", "p": "p5" },
+    { "claim": "Fourteen locks lift the canal along its eleven miles.", "p": "p6" },
+    { "claim": "You can borrow a sewing machine from the library for two weeks.", "p": "p7" },
+    { "claim": "Sixty families sheltered in the school gym during the flood.", "p": "p8" },
+    { "claim": "No audition is needed to join the choir.", "p": "p9" },
+    { "claim": "The bridge reopened in March after two supports were repaired.", "p": "p10" },
+    { "claim": "The footbridge was painted dark green.", "p": "p10" }
+  ],
+  "unsupported": [
+    { "claim": "The lighthouse keeper still lives in the cottage today.", "p": "p1" },
+    { "claim": "The bakery's starter was begun in 1965.", "p": "p2" },
+    { "claim": "Trams run every twenty minutes.", "p": "p3" },
+    { "claim": "The orchard has a hundred trees.", "p": "p4" },
+    { "claim": "The telescope was donated by a local brewer.", "p": "p5" },
+    { "claim": "The canal was dug by steam excavators.", "p": "p6" },
+    { "claim": "The library charges a fee to borrow tools.", "p": "p7" },
+    { "claim": "The river rose by ten metres.", "p": "p8" },
+    { "claim": "The choir performs every Sunday morning.", "p": "p9" },
+    { "claim": "The bridge was rebuilt from stone.", "p": "p10" },
+    { "claim": "The lighthouse is painted red and white.", "p": "p1" },
+    { "claim": "Hartley's delivers bread by van to nearby villages.", "p": "p2" },
+    { "claim": "The tram is free for students.", "p": "p3" },
+    { "claim": "Volunteers prune the orchard trees in August.", "p": "p4" },
+    { "claim": "The observatory is open every night.", "p": "p5" }
+  ],
+  "images": {
+    "_note": "Uses the three original drawings in sample/images. Each query should match exactly one image.",
+    "queries": [
+      { "q": "What did the hansom cab look like in the fog?", "image": "hansom-cab.svg" },
+      { "q": "A horse-drawn cab waiting on a foggy night", "image": "hansom-cab.svg" },
+      { "q": "What tools did the detective use to examine footprints?", "image": "magnifying-glass.svg" },
+      { "q": "A magnifying glass and footprints", "image": "magnifying-glass.svg" },
+      { "q": "What was the speckled band?", "image": "speckled-band.svg" },
+      { "q": "A snake coiled around a bell rope", "image": "speckled-band.svg" }
+    ]
+  }
+}

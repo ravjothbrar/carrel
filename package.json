@@ -1,0 +1,21 @@
+{
+  "name": "carrel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A private research assistant that lives in a browser tab. Dev tooling only: the app itself has no build step.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "serve": "node tools/serve.mjs",
+    "test": "node --test \"tests/unit/*.test.mjs\"",
+    "test:e2e": "node --test --test-concurrency=1 \"tests/e2e/*.test.mjs\"",
+    "test:all": "npm test && npm run test:e2e",
+    "build:sample": "node tools/build-sample.mjs",
+    "build:icons": "node tools/build-icons.mjs",
+    "build:sw": "node tools/build-sw-manifest.mjs"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.0.0",
+    "playwright": "1.56.1"
+  }
+}

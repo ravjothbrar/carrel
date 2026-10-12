@@ -1,0 +1,4 @@
+ONNX Runtime Web (onnxruntime-web)
+Licence: MIT, as declared in the package's package.json.
+Upstream licence text: https://github.com/microsoft/onnxruntime/blob/main/LICENSE
+The npm tarball for this version ships no LICENSE file, so this note stands in for it.
