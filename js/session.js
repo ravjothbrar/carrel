@@ -221,7 +221,7 @@ export class Session extends EventTarget {
       this.statusDone('gen');
       this.gen = { tier, state: 'error', vision: false };
       this.#modelEvent();
-      throw this.#friendly(e, `${cfg.label} could not start`);
+      throw this.#friendly(e, `${cfg.label} could not start`, { gen: true });
     }
   }
 
@@ -231,8 +231,8 @@ export class Session extends EventTarget {
     await this.#startGenerator();
   }
 
-  #friendly(e, prefix) {
-    const hint = this.caps?.fp16 === false ? ' This graphics chip does not report the WebGPU shader-f16 feature, which Gemma 4 (q4f16) needs; that is the likely cause.' : '';
+  #friendly(e, prefix, { gen = false } = {}) {
+    const hint = gen && this.caps?.fp16 === false ? ' This graphics chip does not report the WebGPU shader-f16 feature, which Gemma 4 (q4f16) needs; that is the likely cause.' : '';
     if (hint && e.name !== 'NoWebGPU') return new Error(`${prefix}: ${e.message.slice(0, 200)}.${hint}`);
     if (e.name === 'NoWebGPU') return new Error(e.message);
     if (e.name === 'GpuError') return new Error(`${prefix}: the graphics chip ran out of memory or was reset (${e.message.slice(0, 160)}). Close other tabs that use the GPU and reload.`);
@@ -461,7 +461,7 @@ export class Session extends EventTarget {
       try {
         out = await this.#generateWithFallback(messages, (piece) => view.stream(piece));
       } catch (e) {
-        throw this.#friendly(e, 'The answer could not be written');
+        throw this.#friendly(e, 'The answer could not be written', { gen: true });
       }
       const text = stripThinking(out.text);
       if (!text) throw new Error('The model returned an empty answer. Try rephrasing the question.');

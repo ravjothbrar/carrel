@@ -53,9 +53,9 @@ async function load({ tier, vision = false }, progress) {
   loading = (async () => {
     const t0 = performance.now();
     await disposeCurrent();
-    const report = makeProgressReporter(progress, await downloadPlan(cfg.id, cfg.revision, await modelFiles(cfg.id, { dtype: dtypeFor(cfg), parts: partsFor(vision) })));
+    const report = makeProgressReporter(progress, await downloadPlan(cfg.id, cfg.revision, await modelFiles(cfg.id, { dtype: dtypeFor(cfg), parts: partsFor(vision), revision: cfg.revision })));
     // Gemma4Processor directly: AutoProcessor would additionally insist on a preprocessor_config.json.
-    const processor = await Gemma4Processor.from_pretrained(cfg.id, { revision: cfg.revision, progress_callback: report });
+    const processor = await Gemma4Processor.from_pretrained(cfg.id, { revision: cfg.revision }); // no progress_callback: see embed.worker.js
     const Model = vision ? Gemma4ForConditionalGeneration : Gemma4ForCausalLM;
     const model = await Model.from_pretrained(cfg.id, {
       revision: cfg.revision,
@@ -149,14 +149,14 @@ async function warmup({ tokens = GENERATION.warmupTokens }, progress) {
 
 async function status({ tier, vision = false }) {
   const cfg = GENERATORS[tier];
-  const f = await modelFiles(cfg.id, { dtype: dtypeFor(cfg), parts: partsFor(vision) });
+  const f = await modelFiles(cfg.id, { dtype: dtypeFor(cfg), parts: partsFor(vision), revision: cfg.revision });
   const [{ cached }, sizes] = await Promise.all([cacheStatus(cfg.id, cfg.revision, f), weightSizes(cfg.id, cfg.revision, f)]);
   return { cached, bytes: sizes.bytes };
 }
 
 async function prefetchModel({ tier, vision = false }, progress) {
   const cfg = GENERATORS[tier];
-  const f = await modelFiles(cfg.id, { dtype: dtypeFor(cfg), parts: partsFor(vision) });
+  const f = await modelFiles(cfg.id, { dtype: dtypeFor(cfg), parts: partsFor(vision), revision: cfg.revision });
   prefetchAbort = new AbortController();
   try {
     await prefetch(cfg.id, cfg.revision, f, progress, prefetchAbort.signal);

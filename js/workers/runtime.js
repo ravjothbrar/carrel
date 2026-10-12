@@ -6,7 +6,8 @@
 // counter honest.
 
 import { env } from '../../vendor/transformers/transformers.js';
-import { isAllowedModelHost } from '../config.js';
+import { isAllowedModelHost, pinnedUrl } from '../config.js';
+
 
 export { env };
 
@@ -36,7 +37,8 @@ export function setupRuntime() {
       throw new TypeError('carrel is offline');
     }
     try {
-      const res = await realFetch(input, init);
+      const target = pinnedUrl(url.href);
+      const res = await realFetch(target === url.href ? input : target, init);
       self.postMessage({ type: 'net', host: url.host, method: init?.method ?? 'GET', status: res.status });
       if (res.status === 404) await rememberMissing(url.href);
       return res;

@@ -70,3 +70,21 @@ test('storage that throws never breaks the app', () => {
   assert.equal(readFailure(broken), null);
   writeSetting(true, broken); writeFailure('x', broken); clearFailure(broken);
 });
+
+import { pinnedUrl, EMBED, GENERATORS, isAllowedModelHost } from '../../js/config.js';
+
+test('model downloads are pinned to a commit on the wire, while the library keeps seeing main', () => {
+  assert.equal(pinnedUrl(`https://huggingface.co/${EMBED.id}/resolve/main/onnx/model_q4.onnx`), `https://huggingface.co/${EMBED.id}/resolve/${EMBED.pin}/onnx/model_q4.onnx`);
+  assert.equal(pinnedUrl(`https://huggingface.co/${GENERATORS.e4b.id}/resolve/main/config.json`), `https://huggingface.co/${GENERATORS.e4b.id}/resolve/${GENERATORS.e4b.pin}/config.json`);
+  assert.equal(pinnedUrl('https://huggingface.co/someone/else/resolve/main/x.json'), 'https://huggingface.co/someone/else/resolve/main/x.json');
+  assert.equal(pinnedUrl(`https://huggingface.co/${EMBED.id}/resolve/abc123/x.json`), `https://huggingface.co/${EMBED.id}/resolve/abc123/x.json`);
+  for (const g of [EMBED, ...Object.values(GENERATORS)]) assert.match(g.pin, /^[0-9a-f]{40}$/);
+});
+
+test('only Hugging Face hosts are model hosts, including the CDN the probe found', () => {
+  assert.ok(isAllowedModelHost('huggingface.co'));
+  assert.ok(isAllowedModelHost('us.aws.cdn.hf.co'));
+  assert.ok(isAllowedModelHost('cas-bridge.xethub.hf.co'));
+  assert.ok(!isAllowedModelHost('huggingface.co.evil.example'));
+  assert.ok(!isAllowedModelHost('evilhf.co'));
+});

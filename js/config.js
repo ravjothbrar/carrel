@@ -18,8 +18,12 @@ export const APP = Object.freeze({
 // ---------------------------------------------------------------------------------------------
 export const EMBED = Object.freeze({
   id: 'onnx-community/embeddinggemma-2-ONNX',
-  // UNPINNED: "main". After testing, replace with the commit hash that was tested.
+  // `revision` is what Transformers.js is told (it must stay 'main': the library probes some files on main
+  // regardless, so any other value breaks offline use). `pin` is the commit actually fetched: the guarded fetch
+  // in js/workers/runtime.js rewrites /resolve/main/ to /resolve/<pin>/. Pinned to the commit the CI probe
+  // read on 2026-10-12; bump it deliberately, after re-testing.
   revision: 'main',
+  pin: 'daa72c51243991dfcaf9f9137d2c573d8f7790c0',
   // Parts load separately. audio_encoder is deliberately absent (out of scope, and the worker
   // removes audio_config so Transformers.js does not fetch it). Never fp16: the model card warns
   // it can silently produce NaNs.
@@ -53,7 +57,8 @@ export const GENERATORS = Object.freeze({
   e2b: Object.freeze({
     tier: 'e2b',
     id: 'onnx-community/gemma-4-E2B-it-ONNX',
-    revision: 'main', // UNPINNED, see EMBED.revision
+    revision: 'main',
+    pin: '7c6d3d1d4092253ea241428e88312ab34bfa9c26', // see EMBED.pin
     label: 'Gemma 4 E2B',
     dtype: 'q4f16',
   }),
@@ -61,6 +66,7 @@ export const GENERATORS = Object.freeze({
     tier: 'e4b',
     id: 'onnx-community/gemma-4-E4B-it-ONNX',
     revision: 'main',
+    pin: 'd298100958fdf3c60581158fe201fb240634fb28',
     label: 'Gemma 4 E4B',
     dtype: 'q4f16',
   }),
@@ -130,14 +136,24 @@ export const TIERING = Object.freeze({
 // ---------------------------------------------------------------------------------------------
 // Network policy. The CSP in index.html must list exactly these hosts.
 // ---------------------------------------------------------------------------------------------
-// Transformers.js asks https://huggingface.co/... and follows redirects to a CDN. Which CDN hosts
-// the redirects land on is one of the things tools/spike.html records. UNVERIFIED list:
+// Transformers.js asks https://huggingface.co/... and follows redirects to a CDN. VERIFIED by the CI probe
+// (tools/hf-probe.mjs, 2026-10-12): weight files redirect to us.aws.cdn.hf.co (covered by '.hf.co'), with CORS open.
+// Other regions use sibling hosts under hf.co / huggingface.co, which the suffix rules also cover.
 export const HF_HOSTS = Object.freeze([
   'huggingface.co',
   // suffix matches, used by the in-worker fetch guard and mirrored in the CSP
   '.huggingface.co',
   '.hf.co',
 ]);
+
+const PINS = new Map([[EMBED.id, EMBED.pin], ...Object.values(GENERATORS).map((g) => [g.id, g.pin])]);
+
+/** The library is told 'main' (so cache keys stay stable and offline works); the network is told the pinned commit. */
+export function pinnedUrl(href) {
+  const m = /^(https:\/\/[^/]+\/)([^/]+\/[^/]+)\/resolve\/main\/(.+)$/.exec(href);
+  const pin = m && PINS.get(m[2]);
+  return pin ? `${m[1]}${m[2]}/resolve/${pin}/${m[3]}` : href;
+}
 
 export function isAllowedModelHost(hostname) {
   return HF_HOSTS.some((h) => (h.startsWith('.') ? hostname.endsWith(h) : hostname === h));

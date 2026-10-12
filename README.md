@@ -16,7 +16,7 @@ This repository was built in a sandbox that had **no GPU and no access to huggin
 | The workers' use of Transformers.js, ONNX Runtime and WebGPU: wasm loading under the CSP, sessions on a WebGPU adapter, tokenizer, batching, KV cache, streaming, caching, E4B prefetch and swap, offline reload | Built and tested end to end **against toy ONNX models** on a software WebGPU adapter. Four real bugs were found and fixed this way |
 | **EmbeddingGemma 2 and Gemma 4 themselves** | **Never run.** Class names and call shapes were checked against the vendored Transformers.js 4.3.1 source, nothing more |
 | Model download sizes, load times, tokens per second (E2B and E4B), E4B memory use | **Not measured** |
-| The Hugging Face redirect hosts in the CSP | **Unverified** |
+| The Hugging Face redirect hosts in the CSP | **Verified** by a CI probe of the real repos: weights redirect to `us.aws.cdn.hf.co`, covered by `*.hf.co`, CORS open |
 | Abstention, support and image thresholds | **Uncalibrated placeholders** (the UI says so) |
 | `sample/sherlock.carrel` | **Not built** (needs a GPU and the network). The tooling is written and tested up to the GPU step |
 | Name conflicts | **There is one**, see [Name](#name) |
@@ -88,32 +88,35 @@ Use current Chrome or Edge with WebGPU, serve the repo (`npm run serve`) and:
 
 ### Measured numbers
 
-None of these has been measured. They are filled in from the spike's output, not from estimates.
+Sizes below were **measured** by `tools/hf-probe.mjs` running in GitHub Actions against the real repositories on 2026-10-12 (the `q4` / `q4f16` weights carrel loads). Load times and tokens per second are **not measured**: they need a real GPU.
 
 | Item | Value |
 |---|---|
-| EmbeddingGemma 2 (q4) download | *not measured* (CLAUDE.md says about 175 MB text + 109 MB vision) |
-| Gemma 4 E2B (q4f16) download, text only | *not measured* |
-| Gemma 4 E4B (q4f16) download, text only | *not measured* |
-| Extra download for image description (vision plus audio files) | *not measured* |
-| Embedding model load time | *not measured* |
-| E2B load time, decode tokens/s | *not measured* |
-| E4B load time, decode tokens/s, memory | *not measured* |
-| Hugging Face hosts the files really come from | *not measured* |
+| EmbeddingGemma 2 (q4): text model + vision encoder | **283.6 MB** (174.5 + 109.1). The 189.3 MB audio encoder is never loaded |
+| Gemma 4 E2B (q4f16), text-only: `embed_tokens` + decoder | **3,111 MB** (1,590.7 + 1,520.4) |
+| Gemma 4 E4B (q4f16), text-only | **4,906 MB** (2,017.5 + 2,888.0) |
+| **First run, default setup (EmbeddingGemma + E2B)** | **about 3.4 GB, once** |
+| Extra for image description (vision + audio encoders, E2B) | **271 MB** (99.4 + 171.5): Transformers.js cannot skip the audio file |
+| Free storage needed before E4B is attempted | at least 2 x 4.9 GB, about 9.8 GB |
+| Embedding output | `sentence_embedding`, 768-d, as assumed |
+| Gemma 4 decoder KV cache | float16: needs the GPU feature `shader-f16` |
+| Hugging Face redirect host | `us.aws.cdn.hf.co` |
+| Model revisions (pinned in `js/config.js`) | EmbeddingGemma `daa72c5`, E2B `7c6d3d1`, E4B `d298100` |
+| Embedding model load time; E2B and E4B load time and decode tokens/s; E4B memory | *not measured* |
 
-What *has* been measured, in this repository: the app shell and vendored libraries precache to **30.3 MB** (26.9 MB of that is the ONNX Runtime wasm); fonts are 188 KB.
+What has also been measured in this repository: the app shell and vendored libraries precache to **30.3 MB** (26.9 MB of that is the ONNX Runtime wasm); fonts are 188 KB.
 
 ## Assumptions that could be wrong
 
 These are the places where carrel guesses about files it could not open. Each fails loudly rather than silently:
 
-- **The embedding model's output name.** carrel looks for `sentence_embedding` (and a few alternatives) and refuses to guess a pooling step if none exists.
+- ~~The embedding model's output name~~ **confirmed**: `sentence_embedding`. carrel still refuses to guess a pooling step if it is ever missing.
 - **EmbeddingGemma 2's task prefix for citation checking** (`task: fact checking | query: …`) comes from the first EmbeddingGemma's prompt list, not the v2 card. `tools/calibrate.html` reports how well it separates supported from unsupported claims.
-- **`q4` and `q4f16` exist** for every part that is loaded (including the vision encoder), and the text-only `Gemma4ForCausalLM` path loads `embed_tokens` + `decoder_model_merged`. The ONNX layout was inferred from Transformers.js' session tables.
+- ~~`q4` / `q4f16` exist for every part~~ **confirmed** (including the vision encoder), and the `embed_tokens` and `decoder_model_merged` inputs and outputs match what Transformers.js feeds them. Still unrun: the text-only `Gemma4ForCausalLM` path against the real files.
 - **Gemma 4's chat template** accepts a `system` role and an `enable_thinking` flag; carrel strips thinking-channel debris if the model emits any, but the marker syntax is a guess.
 - **Image description needs an extra download**: Transformers.js has no option to skip the audio encoder for `Gemma4ForConditionalGeneration`, so the first image description loads vision and audio files together. carrel asks before downloading them and says the size.
 - **Embedding images** with the real model has not been exercised (the toy embedder is text only).
-- Model revisions are `main`, **unpinned**. Pin the commit you test (`EMBED.revision`, `GENERATORS.*.revision`).
+- Model revisions are pinned (see the table). `ModelRegistry.get_files` reads `config.json` from `main` to list files; if `main` moves a lot, bump the pins together.
 - The thresholds. Until calibration, the "not in your documents" cut-off and the support cut-off are guesses, and both can misjudge.
 
 ## Tests

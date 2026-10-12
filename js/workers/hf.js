@@ -1,25 +1,36 @@
 // File-level helpers for Hugging Face model repos, built on Transformers.js' own ModelRegistry
 // and cache layout (Cache Storage, keyed by the resolved URL; verified against 4.3.1).
 
-import { ModelRegistry, env } from '../../vendor/transformers/transformers.js';
+import { AutoConfig, ModelRegistry, env } from '../../vendor/transformers/transformers.js';
 
 export function cacheUrl(id, revision, file) {
   return `${env.remoteHost.replace(/\/$/, '')}/${id}/resolve/${encodeURIComponent(revision)}/${file}`;
 }
 
 /**
- * Which files a load will fetch.
+ * Which files a load will fetch, worked out from the model's own (cached) config.json, the way
+ * Transformers.js does it. ModelRegistry.get_files is not used: it always reads config.json from `main`
+ * (not the pinned revision) and probes optional files over the network, which breaks offline use.
  *  parts: 'embed'       text + vision encoder, never the audio encoder
  *         'gen-text'    embed_tokens + decoder only
  *         'gen-vision'  everything the library loads for Gemma4ForConditionalGeneration
  */
-export async function modelFiles(id, { dtype, parts }) {
-  const all = await ModelRegistry.get_files(id, { dtype });
-  return all.filter((f) => {
-    if (parts === 'embed') return !/audio_encoder/.test(f);
-    if (parts === 'gen-text') return !/audio_encoder|vision_encoder/.test(f);
-    return true;
-  });
+export async function modelFiles(id, { dtype, parts, revision }) {
+  const config = await AutoConfig.from_pretrained(id, { revision });
+  const external = config['transformers.js_config']?.use_external_data_format ?? {};
+  const sessions = { embed: ['model', 'vision_encoder'], 'gen-text': ['embed_tokens', 'decoder_model_merged'], 'gen-vision': ['embed_tokens', 'decoder_model_merged', 'vision_encoder', 'audio_encoder'] }[parts];
+  const suffixOf = { q4: '_q4', q4f16: '_q4f16', fp16: '_fp16', q8: '_quantized', fp32: '' };
+  const files = ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'processor_config.json', 'chat_template.jinja'];
+  if (parts !== 'embed') files.push('generation_config.json');
+  const has = { vision_encoder: !!config.vision_config, audio_encoder: !!config.audio_config };
+  for (const session of sessions.filter((x) => has[x] !== false)) {
+    const kind = typeof dtype === 'string' ? dtype : dtype[session];
+    const name = `${session}${suffixOf[kind] ?? ''}.onnx`;
+    files.push(`onnx/${name}`);
+    const chunks = Number(external[name] ?? external[session] ?? 0);
+    for (let i = 0; i < chunks; i++) files.push(`onnx/${name}_data${i === 0 ? '' : `_${i}`}`);
+  }
+  return files;
 }
 
 export const isWeightFile = (f) => f.startsWith('onnx/');

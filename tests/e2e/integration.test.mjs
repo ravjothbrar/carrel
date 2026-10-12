@@ -131,6 +131,7 @@ test('full real pipeline: consent, download, index, retrieve, stream an answer, 
 
   // --- only Hugging Face, only GET, and the counter agrees
   assert.ok(hfLog.every((l) => /^GET \/onnx-community\//.test(l)), hfLog.join('\n'));
+  assert.ok(hfLog.every((l) => /\/resolve\/[0-9a-f]{40}\//.test(l)), 'every request is pinned to a commit on the wire');
   assert.ok(Number(await page.locator('#net-count').textContent()) >= 10);
   assert.deepEqual(errors, []);
   await page.close();

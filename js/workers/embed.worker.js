@@ -22,7 +22,7 @@ let loading = null;
 let health = null;
 
 async function files() {
-  return modelFiles(EMBED.id, { dtype: EMBED.dtype, parts: 'embed' });
+  return modelFiles(EMBED.id, { dtype: EMBED.dtype, parts: 'embed', revision: EMBED.revision });
 }
 
 async function load(_, progress) {
@@ -34,7 +34,8 @@ async function load(_, progress) {
     // Dropping audio_config is how Transformers.js is told not to fetch audio_encoder.
     const config = await AutoConfig.from_pretrained(EMBED.id, { revision: EMBED.revision });
     delete config.audio_config;
-    processor = await EmbeddingGemma2Processor.from_pretrained(EMBED.id, { revision: EMBED.revision, progress_callback: report });
+    // No progress_callback here: with one, Transformers.js probes tokenizer files on `main` (ignoring the pinned revision).
+    processor = await EmbeddingGemma2Processor.from_pretrained(EMBED.id, { revision: EMBED.revision });
     model = await EmbeddingGemma2Model.from_pretrained(EMBED.id, {
       revision: EMBED.revision,
       config,
