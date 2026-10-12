@@ -232,6 +232,8 @@ export class Session extends EventTarget {
   }
 
   #friendly(e, prefix) {
+    const hint = this.caps?.fp16 === false ? ' This graphics chip does not report the WebGPU shader-f16 feature, which Gemma 4 (q4f16) needs; that is the likely cause.' : '';
+    if (hint && e.name !== 'NoWebGPU') return new Error(`${prefix}: ${e.message.slice(0, 200)}.${hint}`);
     if (e.name === 'NoWebGPU') return new Error(e.message);
     if (e.name === 'GpuError') return new Error(`${prefix}: the graphics chip ran out of memory or was reset (${e.message.slice(0, 160)}). Close other tabs that use the GPU and reload.`);
     if (e.name === 'TypeError' && /fetch/i.test(e.message)) return new Error(`${prefix}: the download failed. Check your connection and try again.`);

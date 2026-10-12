@@ -87,6 +87,8 @@ export async function capabilities() {
   const info = adapter.info ?? (adapter.requestAdapterInfo ? await adapter.requestAdapterInfo() : {});
   return {
     webgpu: true,
+    // Gemma 4's q4f16 decoder keeps its KV cache in float16, which needs the shader-f16 feature.
+    fp16: adapter.features?.has?.('shader-f16') ?? false,
     adapter: { vendor: info.vendor ?? '', architecture: info.architecture ?? '', device: info.device ?? '', description: info.description ?? '' },
     limits: { maxBufferSize: adapter.limits.maxBufferSize, maxStorageBufferBindingSize: adapter.limits.maxStorageBufferBindingSize },
   };
