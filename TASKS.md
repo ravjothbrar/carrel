@@ -48,7 +48,7 @@ The build sandbox had **no access to huggingface.co, gutenberg.org or Wikimedia,
 ## Phase 5: spike, calibration, sample, release
 - [~] `tools/spike.html`: sizes, load time, tokens per second, adapter limits, Hugging Face hosts
 - [~] `tools/calibrate.html`: abstention / support / image thresholds on a labelled set (`tools/calibration-set.json`, original text)
-- [~] `tools/build-sample.mjs`: Gutenberg fetch, header/footer strip (tested), chunk, embed on the GPU, write `sample/sherlock.carrel`
+- [~] `tools/build-sample.mjs`: Gutenberg fetch, header/footer strip (tested), chunk, embed on the GPU, write `sample/sherlock.carrel`. Runs in the `build-sample` Action (software WebGPU); a long run was still in progress when this was written
 - [~] `tools/parity.mjs`: re-embed stored sample chunks and compare cosine
 - [x] Sample images: three original drawings, CC0, source and licence recorded
 - [ ] Run the spike, calibration and sample build on a real machine; fill the numbers into the README table; commit `sample/sherlock.carrel`

@@ -18,7 +18,7 @@ This repository was built in a sandbox that had **no GPU and no access to huggin
 | Model download sizes, load times, tokens per second (E2B and E4B), E4B memory use | **Not measured** |
 | The Hugging Face redirect hosts in the CSP | **Verified** by a CI probe of the real repos: weights redirect to `us.aws.cdn.hf.co`, covered by `*.hf.co`, CORS open |
 | Abstention, support and image thresholds | **Uncalibrated placeholders** (the UI says so) |
-| `sample/sherlock.carrel` | **Not built** (needs a GPU and the network). The tooling is written and tested up to the GPU step |
+| `sample/sherlock.carrel` | **Not in the repo yet.** The `build-sample` GitHub Action builds it on a software WebGPU adapter (no GPU on runners) and commits it to `main` if the build and the parity test pass. Until it lands, the sample link says so plainly |
 | Name conflicts | **There is one**, see [Name](#name) |
 
 Everything unverified is listed with the exact command that settles it in [What to run on a real machine](#what-to-run-on-a-real-machine).
