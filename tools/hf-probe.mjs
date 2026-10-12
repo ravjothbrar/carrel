@@ -57,3 +57,8 @@ for (const r of repos) {
   console.log(`\n=== ${r.name} (${r.id})\n${JSON.stringify(o, null, 1)}`);
 }
 fs.writeFileSync('hf-probe.json', JSON.stringify(out, null, 2));
+
+// compact summary, last in the log so a tailed log always includes it
+for (const [name, o] of Object.entries(out)) {
+  console.log(`SUMMARY ${name} ${JSON.stringify({ sha: o.recentCommit, MB: o.summaryMB, files: o.configFilesPresent, redirect: o.redirect, model: o.config && { type: o.config.model_type, vision: o.config.hasVision, audio: o.config.hasAudio, layers: o.config.layers }, suffixes: o.suffixesPresent, template: o.chatTemplate && { system: o.chatTemplate.mentionsSystem, thinking: o.chatTemplate.mentionsThinking } })}`);
+}
